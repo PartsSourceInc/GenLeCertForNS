@@ -1569,20 +1569,21 @@ if ((-not $CleanADC) -and (-not $RemoveTestCertificates) -and ($ValidationMethod
         Write-Host -ForeGroundColor Yellow "$($Record.TXTName)"
         Write-Host -ForeGroundColor White -NoNewLine " -TXT Record Value.: "
         Write-Host -ForeGroundColor Yellow "$($Record.TXTValue)"
+        Add-DnsServerResourceRecord -ZoneName "$($Record.fqdn)" -Txt -Name "$($Record.TXTName)" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -DescriptiveText "$($Record.TXTValue)"
     }
     ""        
-    Write-Host -ForegroundColor White "********************************************************************"
-    $($TXTRecords | Format-List | Out-String).Trim() | clip.exe
-    Write-Host -ForegroundColor Yellow "`r`nINFO: Data is copied tot the clipboard"
-    $answer = Read-Host -Prompt "Enter `"yes`" when ready to continue"
-    if (-not ($answer.ToLower() -eq "yes")) {
-        Write-Host -ForegroundColor Yellow "You've entered `"$answer`", last chance to continue"
-        $answer = Read-Host -Prompt "Enter `"yes`" when ready to continue, or something else to stop and exit"
-        if (-not ($answer.ToLower() -eq "yes")) {
-            Write-Host -ForegroundColor Yellow "You've entered `"$answer`", ending now!"
-            Exit (0)
-        }
-    }
+    # Write-Host -ForegroundColor White "********************************************************************"
+    # $($TXTRecords | Format-List | Out-String).Trim() | clip.exe
+    # Write-Host -ForegroundColor Yellow "`r`nINFO: Data is copied tot the clipboard"
+    # $answer = Read-Host -Prompt "Enter `"yes`" when ready to continue"
+    # if (-not ($answer.ToLower() -eq "yes")) {
+    #     Write-Host -ForegroundColor Yellow "You've entered `"$answer`", last chance to continue"
+    #     $answer = Read-Host -Prompt "Enter `"yes`" when ready to continue, or something else to stop and exit"
+    #     if (-not ($answer.ToLower() -eq "yes")) {
+    #         Write-Host -ForegroundColor Yellow "You've entered `"$answer`", ending now!"
+    #         Exit (0)
+    #     }
+    # }
     Write-Host "Continuing, Waiting 30 seconds for the records to settle"
     Start-Sleep -Seconds 30
     Write-Verbose -Message "Start verifying the TXT records."
@@ -1620,6 +1621,7 @@ if ((-not $CleanADC) -and (-not $RemoveTestCertificates) -and ($ValidationMethod
        Write-Warning "Found issues during the initial test. TXT validation might fail. Waiting an aditional 30 seconds before continuing"
        Start-Sleep -Seconds 20
     }
+    Remove-DnsServerResourceRecord -ZoneName "$($Record.fqdn)" -RRType Txt -Name "$($Record.TXTName)"
 }
 
 #endregion DNS Challenge
