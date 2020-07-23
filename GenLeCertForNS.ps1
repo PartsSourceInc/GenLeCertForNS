@@ -1569,7 +1569,9 @@ if ((-not $CleanADC) -and (-not $RemoveTestCertificates) -and ($ValidationMethod
         Write-Host -ForeGroundColor Yellow "$($Record.TXTName)"
         Write-Host -ForeGroundColor White -NoNewLine " -TXT Record Value.: "
         Write-Host -ForeGroundColor Yellow "$($Record.TXTValue)"
-        Add-DnsServerResourceRecord -ZoneName "$($Record.fqdn)" -Txt -Name "$($Record.TXTName)" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -DescriptiveText "$($Record.TXTValue)"
+        Write-Host -ForeGroundColor White -NoNewLine " -ZoneName.........: "
+        Write-Host -ForeGroundColor Yellow "$($Record.TXTName.Substring($Record.TXTName.IndexOf(".") + 1))"
+        Add-DnsServerResourceRecord -ZoneName "$($Record.TXTName.Substring($Record.TXTName.IndexOf(".") + 1))" -Txt -Name "_acme-challenge" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -DescriptiveText "$($Record.TXTValue)"
     }
     ""        
     # Write-Host -ForegroundColor White "********************************************************************"
@@ -1621,7 +1623,6 @@ if ((-not $CleanADC) -and (-not $RemoveTestCertificates) -and ($ValidationMethod
        Write-Warning "Found issues during the initial test. TXT validation might fail. Waiting an aditional 30 seconds before continuing"
        Start-Sleep -Seconds 20
     }
-    Remove-DnsServerResourceRecord -ZoneName "$($Record.fqdn)" -RRType Txt -Name "$($Record.TXTName)"
 }
 
 #endregion DNS Challenge
@@ -1937,6 +1938,10 @@ if ((-not ($CleanADC)) -and (-not ($RemoveTestCertificates))) {
             }
             ""        
             Write-Host -ForegroundColor Yellow "********************************************************************"
+			Remove-DnsServerResourceRecord -ZoneName "partssource.com" -RRType "TXT" -Name "_acme-challenge" -Force
+			Remove-DnsServerResourceRecord -ZoneName "mypartssource.com" -RRType "TXT" -Name "_acme-challenge" -Force
+			Remove-DnsServerResourceRecord -ZoneName "partsfinder.com" -RRType "TXT" -Name "_acme-challenge" -Force
+
         }
         if (-not $Production) {
             Write-Host -ForeGroundColor Green "`r`nYou are now ready for the Production version!"
